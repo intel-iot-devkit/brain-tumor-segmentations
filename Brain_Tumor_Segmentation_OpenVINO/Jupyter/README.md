@@ -23,7 +23,7 @@ This reference implementation applies the U-Net architecture to segment brain tu
       uname -a
   
 * OpenCL™ Runtime Package
-* Intel® Distribution of OpenVINO™ toolkit 2019 R2 Release
+* Intel® Distribution of OpenVINO™ toolkit 2019 R3 Release
 * Jupyter
 
 ## How It works
@@ -67,7 +67,7 @@ NumPy is a library for the Python programming language, adding support for large
 Matplotlib is a plotting library for the Python programming language and its numerical mathematics extension NumPy. It provides an object-oriented API for embedding plots into applications.
 
 ### Which model to use
-This application uses a pre-trained model (unet_model_for_decathlon.hdf5), that is provided in the `/resources` directory. This model is trained using the __Task01_BrainTumour.tar__ dataset from the [Medical Segmentation Decathlon](http://medicaldecathlon.com/), made available under the [(CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/) license. Instructions on how to train your model can be found here [https://github.com/IntelAI/unet/tree/master/2D](https://github.com/IntelAI/unet/tree/master/2D). This model needs to be passed through the **model optimizer** to generate the IR (the __.xml__ and __.bin__ files) that will be used by the application.
+This application uses a pre-trained model (unet_model_for_decathlon.hdf5), that is provided in the `/resources` directory. This model is trained using the __Task01_BrainTumour.tar__ dataset from the [Medical Segmentation Decathlon](http://medicaldecathlon.com/), made available under the [(CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/) license. Instructions on how to train your model can be found here [https://github.com/IntelAI/unet/tree/master/2D](https://github.com/IntelAI/unet/tree/master/2D)
 
 To install the dependencies of the RI and to optimize the pre-trained model, run the following command:
 
@@ -93,7 +93,36 @@ Go to the _Brain_Tumor_Segmentaion_OpenVINO_directory_ and open the Jupyter note
  
     jupyter notebook
 
+**NOTE**:
+ Before running the application on the FPGA, set the environment variables and  program the AOCX (bitstream) file.<br>
 
+ Set the Board Environment Variable to the proper directory:
+
+ ```
+ export AOCL_BOARD_PACKAGE_ROOT=/opt/intel/openvino/bitstreams/a10_vision_design_sg<#>_bitstreams/BSP/a10_1150_sg<#>
+ ```
+ **NOTE**: If you do not know which version of the board you have, please refer to the product label on the fan cover side or by the product SKU: Mustang-F100-A10-R10 => SG1; Mustang-F100-A10E-R10 => SG2 <br>
+
+ Set the Board Environment Variable to the proper directory: 
+ ```
+ export QUARTUS_ROOTDIR=/home/<user>/intelFPGA/18.1/qprogrammer
+ ```
+ Set the remaining environment variables:
+ ```
+ export PATH=$PATH:/opt/altera/aocl-pro-rte/aclrte-linux64/bin:/opt/altera/aocl-pro-rte/aclrte-linux64/host/linux64/bin:/home/<user>/intelFPGA/18.1/qprogrammer/bin
+ export INTELFPGAOCLSDKROOT=/opt/altera/aocl-pro-rte/aclrte-linux64
+ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$AOCL_BOARD_PACKAGE_ROOT/linux64/lib
+ export CL_CONTEXT_COMPILER_MODE_INTELFPGA=3
+ source /opt/altera/aocl-pro-rte/aclrte-linux64/init_opencl.sh
+ ```
+ **NOTE**: It is recommended to create your own script for your system to aid in setting up these environment variables. It will be run each time you need a new terminal or restart your system. 
+
+ The bitstreams for HDDL-F can be found under the `/opt/intel/openvino/bitstreams/a10_vision_design_sg<#>_bitstreams/` directory.<br><br>To program the bitstream use the below command:<br>
+ ```
+ aocl program acl0 /opt/intel/openvino/bitstreams/a10_vision_design_sg<#>_bitstreams/2019R3_PV_PL1_FP16_RMNet.aocx
+ ```
+
+ For more information on programming the bitstreams, please refer to [OpenVINO-Install-Linux-FPGA](https://software.intel.com/en-us/articles/OpenVINO-Install-Linux-FPGA#inpage-nav-11)
 #### Follow the steps to run the code on Jupyter*:
 
 ![Jupyter Notebook](../docs/images/jupyter.png)
@@ -153,3 +182,12 @@ Go to the _Brain_Tumor_Segmentaion_OpenVINO_directory_ and open the Jupyter note
       * The Intel® Movidius™ VPU can only run FP16 models. Set the path of the FP16 model in the environment variable `MODEL` as given below: <br>
       **%env MODEL = ../resources/output/IR_models/FP16/saved_model.xml** <br>
       * **CPU_EXTENSION** environment variable is not required.
+
+4. To run the application on **FPGA**:
+     * Change the **%env DEVICE = CPU** to **%env DEVICE = HETERO:FPGA,CPU**
+     * With the **floating point precision 16 (FP16)**, change the path of the model in the environment variable **MODEL** as given below:<br>
+      
+        **%env MODEL = ../resources/output/IR_models/FP16/saved_model.xml** <br>
+     * Export the **CPU_EXTENSION** environment variable as shown below:
+         
+           %env CPU_EXTENSION = /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_sse4.so
