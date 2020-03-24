@@ -23,7 +23,7 @@
 #Install the dependencies
 sudo apt-get update
 sudo apt-get install python3-pip
-sudo pip3 install numpy jupyter h5py
+sudo pip3 install numpy jupyter h5py matplotlib kiwisolver
 sudo apt-get install python3-matplotlib
 sudo apt-get install python3-tk
 
@@ -32,5 +32,5 @@ BASE_DIR=`pwd`
 #Optimize the model
 cd /opt/intel/openvino/deployment_tools/model_optimizer/
 
-python3.5 mo_tf.py --input_model $BASE_DIR/resources/saved_model_frozen.pb  --output_dir $BASE_DIR/resources/output/IR_models/FP32/ --input_shape=[1,144,144,4] --data_type FP32 --model_name saved_model
-python3.5 mo_tf.py --input_model $BASE_DIR/resources/saved_model_frozen.pb  --output_dir $BASE_DIR/resources/output/IR_models/FP16/ --input_shape=[1,144,144,4] --data_type FP16 --model_name saved_model
+python3 mo_tf.py --input_model $BASE_DIR/resources/saved_model_frozen.pb  --output_dir $BASE_DIR/resources/output/IR_models/FP32/ --input_shape=[1,144,144,4] --data_type FP32 --model_name saved_model
+python3 mo_tf.py --input_model $BASE_DIR/resources/saved_model_frozen.pb  --output_dir $BASE_DIR/resources/output/IR_models/FP16/ --input_shape=[1,144,144,4] --data_type FP16 --model_name saved_model
